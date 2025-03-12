@@ -1,7 +1,16 @@
+
+FROM golang:alpine AS builder
+
+WORKDIR /build
+COPY . .
+RUN apk add --no-cache --update go gcc g++
+RUN go build -a -o cloudreve -ldflags " -X 'github.com/cloudreve/Cloudreve/v3/pkg/conf.BackendVersion=$VERSION' -X 'github.com/cloudreve/Cloudreve/v3/pkg/conf.LastCommit=$COMMIT_SHA'"
+
 FROM alpine:latest
 
 WORKDIR /cloudreve
-COPY cloudreve ./cloudreve
+
+COPY --from=builder /build/cloudreve ./cloudreve
 
 RUN apk update \
     && apk add --no-cache tzdata \
